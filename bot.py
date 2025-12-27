@@ -9,10 +9,12 @@ spam_tasks = {}  # user_id : asyncio task
 
 async def spam(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
+    chat_id = update.effective_chat.id  # group ya private chat id
 
     if len(context.args) < 2:
-        await update.message.reply_text(
-            "❌ Format galat hai\nUse:\n/spam 10 Hello bhai"
+        await context.bot.send_message(
+            chat_id=chat_id,
+            text="❌ Format galat hai\nUse:\n/spam 10 Hello bhai"
         )
         return
 
@@ -20,12 +22,12 @@ async def spam(update: Update, context: ContextTypes.DEFAULT_TYPE):
         count = int(context.args[0])   # first argument = number
         message = " ".join(context.args[1:])  # rest = message
     except:
-        await update.message.reply_text("❌ Number galat hai")
+        await context.bot.send_message(chat_id=chat_id, text="❌ Number galat hai")
         return
 
     async def send_messages():
         for i in range(count):
-            await update.message.reply_text(message)
+            await context.bot.send_message(chat_id=chat_id, text=message)
             await asyncio.sleep(0.2)
 
     task = asyncio.create_task(send_messages())
@@ -34,13 +36,14 @@ async def spam(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def stop(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
+    chat_id = update.effective_chat.id
 
     if user_id in spam_tasks:
         spam_tasks[user_id].cancel()
         del spam_tasks[user_id]
-        await update.message.reply_text("🛑 Spam stopped")
+        await context.bot.send_message(chat_id=chat_id, text="🛑 Spam stopped")
     else:
-        await update.message.reply_text("Koi spam chal nahi raha 🙂")
+        await context.bot.send_message(chat_id=chat_id, text="Koi spam chal nahi raha 🙂")
 
 
 app = ApplicationBuilder().token(TOKEN).build()
